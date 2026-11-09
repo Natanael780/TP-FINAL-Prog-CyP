@@ -1,0 +1,31 @@
+=== TP Final PCyP 2026 - resumen de la corrida ===
+Etiqueta: E7-03
+Politica: aleatoria
+Perfil de tiempos: rapido  alfa(ms) T2=60 T3=40 T5=70 T7=35 T8=65  beta = infinito
+Duracion hasta el invariante 200: 14.565 s
+Se completaron los 200 invariantes: si
+
+Invariantes de transicion (expresion regular sobre el log):
+  IT1 tarjeta          72  ( 36.0 %)
+  IT2 alto riesgo      64  ( 32.0 %)
+  IT3 transferencia    64  ( 32.0 %)
+  Total               200
+  Residuo de la regex: vacio (3 pasadas)
+
+Disparos por transicion:
+  T0=200  T1=72  T2=72  T3=72  T4=64  T5=64  T6=64  T7=64  T8=64  T9=200
+Disparos por hilo:
+  SA-1: 69
+  SA-2: 66
+  SA-3: 65
+  SB-1: 216
+  SC-1: 128
+  SD-1: 192
+  SE-1: 67
+  SE-2: 67
+  SE-3: 66
+
+Verificaciones de P-invariantes (una por disparo): 936, todas OK
+Marcado final: [3, 0, 0, 0, 0, 0, 0, 1, 1, 0] = M0
+Hilos creados: 9 - hilos activos al terminar: 0
+Resultado: CORRECTO

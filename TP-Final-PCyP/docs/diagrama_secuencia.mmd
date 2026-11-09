@@ -1,0 +1,56 @@
+sequenceDiagram
+    title Disparo de una transición en el monitor (con política y tiempo)
+    actor H as Hilo (Disparador)
+    participant M as Monitor
+    participant X as Mutex
+    participant R as RedDePetri
+    participant CT as ControlTemporal
+    participant P as Politica
+    participant C as Colas
+    participant L as Log
+
+    H->>M: fireTransition(t)
+    M->>X: acquire()
+    loop hasta disparar t (el hilo tiene el mutex en cada vuelta)
+        M->>R: estaSensibilizada(t)
+        M->>P: permite(t)
+        M->>CT: hayAlguienEsperando(t)
+        alt no sensibilizada, sin permiso de la política u otro hilo espera su ventana
+            M->>C: anotar(t)
+            M->>X: release()
+            M->>C: esperar(t)
+            Note over M,C: el hilo queda bloqueado en la cola de t
+            C-->>M: despertado: recibe el mutex de quien lo despertó
+            Note over M: vuelve al ciclo
+        else antes de la ventana (milisHastaVentana(t) > 0)
+            M->>CT: setEsperando(t, true)
+            M->>X: release()
+            Note over M,X: Thread.sleep(espera) fuera del monitor
+            M->>X: acquire()
+            M->>CT: setEsperando(t, false)
+            Note over M: vuelve al ciclo
+        else ventana vencida (transcurrido > beta)
+            M->>X: release()
+            M-->>H: false
+        else dentro de la ventana: disparo
+            M->>R: disparar(t, ahora)
+            Note right of R: M' = M + I·σ, sensibilizadas y timestamps nuevos
+            M->>R: verificarInvariantesPlaza()
+            M->>P: notificarDisparo(t)
+            Note right of P: si t tenía el turno del conflicto, elige el próximo turno
+            M->>L: registrar(t, ahora, marcado)
+            M->>R: getSensibilizadas()
+            M->>C: quienesEstan()
+            M->>P: permite(i) por cada candidata
+            Note over M,P: despertables = sensibilizadas ∧ esperando ∧ permitidas
+            M->>P: cual(despertables)
+            P-->>M: elegida
+            alt hay una elegida
+                M->>C: despertar(elegida)
+                Note over M,C: el mutex pasa al hilo despertado (no se libera)
+            else no hay a quién despertar
+                M->>X: release()
+            end
+            M-->>H: true
+        end
+    end

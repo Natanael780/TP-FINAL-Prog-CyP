@@ -1,0 +1,157 @@
+classDiagram
+    direction TB
+    class Main {
+        +main(String[] args)$
+    }
+    class Experimentos {
+        +main(String[] args)$
+    }
+    class Simulacion {
+        +int INVARIANTES_POR_CORRIDA = 200$
+        +ejecutar(politica, perfil, etiqueta, carpetaLogs)$ Resultado
+        -crearPolitica(nombre, red)$ Politica
+    }
+    class Resultado {
+        +esCorrecto() boolean
+        +resumen() String
+        +filaCsv() String
+    }
+    class MonitorInterface {
+        <<interface>>
+        +fireTransition(int transition) boolean
+    }
+    class Monitor {
+        -Semaphore mutex
+        -RedDePetri red
+        -ControlTemporal tiempo
+        -Colas colas
+        -Politica politica
+        -Log log
+        +fireTransition(int transition) boolean
+        -puedeIntentar(int t) boolean
+        -disparar(int t, long ahora)
+        -despertarOSalir()
+        -esperarEnCola(int t) boolean
+        -dormirFueraDelMonitor(int t, long esperaMs) boolean
+    }
+    class Colas {
+        -Semaphore[] colas
+        -int[] esperando
+        +anotar(int t)
+        +esperar(int t)
+        +despertar(int t)
+        +quienesEstan() boolean[]
+    }
+    class Politica {
+        <<interface>>
+        +permite(int t) boolean
+        +cual(boolean[] candidatas) int
+        +notificarDisparo(int t)
+        +getNombre() String
+    }
+    class PoliticaPorConflictos {
+        <<abstract>>
+        -List~int[]~ conflictos
+        -int[] turno
+        +permite(int t) boolean
+        +notificarDisparo(int t)
+        #elegirTurno(int[] conjunto)* int
+    }
+    class PoliticaAleatoria {
+        -Random azar
+        #elegirTurno(int[] conjunto) int
+        +cual(boolean[] candidatas) int
+    }
+    class PoliticaPriorizada {
+        -int[] pesos
+        -int[] acumulado
+        #elegirTurno(int[] conjunto) int
+        +cual(boolean[] candidatas) int
+    }
+    class RedDePetri {
+        -int[][] wMenos
+        -int[][] incidencia
+        -int[] marcado
+        -boolean[] sensibilizadas
+        -int[][] pInvariantes
+        +estaSensibilizada(int t) boolean
+        +getSensibilizadas() boolean[]
+        +disparar(int t, long ahoraNs)
+        +verificarInvariantesPlaza()
+        +conflictosEstructurales() List~int[]~
+        -ecuacionDeEstado(int t) int[]
+    }
+    class ControlTemporal {
+        -long[] alfa
+        -long[] beta
+        -long[] timestamp
+        -boolean[] esperando
+        +milisHastaVentana(int t, long ahoraNs) long
+        +ventanaVencida(int t, long ahoraNs) boolean
+        +hayAlguienEsperando(int t) boolean
+        +setEsperando(int t, boolean valor)
+    }
+    class ConfiguracionRed {
+        <<datos de la red>>
+        +int[][] W_MENOS$
+        +int[][] W_MAS$
+        +int[] MARCADO_INICIAL$
+        +int[][] P_INVARIANTES$
+        +String REGEX_T_INVARIANTES$
+        +int[] PESOS_PRIORIZADA$
+        +segmentos()$ Segmento[]
+        +alfaDelPerfil(String perfil)$ long[]
+        +beta()$ long[]
+    }
+    class Segmento {
+        -String nombre
+        -int[] secuencia
+        -int hilos
+        -Rol rol
+    }
+    class Disparador {
+        <<Runnable>>
+        -String nombre
+        -int[] secuencia
+        -AtomicInteger cupo
+        -CountDownLatch ciclosCompletos
+        +run()
+        -accion(int t)
+    }
+    class FabricaHilos {
+        <<ThreadFactory>>
+        -List~Thread~ creados
+        +newThread(Runnable tarea) Thread
+        +esperarQueTerminen(long milis)
+        +contarVivos() int
+    }
+    class Log {
+        -StringBuilder secuencia
+        -StringBuilder eventos
+        +registrar(int t, long ahoraNs, int[] marcado)
+        +getSecuencia() String
+    }
+    class AnalizadorInvariantes {
+        -Pattern patron
+        +analizar(String secuencia) Resultado
+    }
+
+    Main ..> Simulacion : usa
+    Experimentos ..> Simulacion : usa
+    Simulacion ..> Resultado : crea
+    Simulacion ..> ConfiguracionRed : lee
+    Simulacion ..> Monitor : crea
+    Simulacion ..> Disparador : crea 9
+    Simulacion ..> FabricaHilos : usa
+    Simulacion ..> AnalizadorInvariantes : usa
+    MonitorInterface <|.. Monitor
+    Monitor *-- Colas
+    Monitor --> RedDePetri
+    Monitor --> Politica
+    Monitor --> Log
+    RedDePetri *-- ControlTemporal
+    Politica <|.. PoliticaPorConflictos
+    PoliticaPorConflictos <|-- PoliticaAleatoria
+    PoliticaPorConflictos <|-- PoliticaPriorizada
+    ConfiguracionRed ..> Segmento : define
+    Disparador --> MonitorInterface : fireTransition

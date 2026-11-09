@@ -1,0 +1,9 @@
+Version de comparacion: la politica solo elige a quien despertar (no resuelve el conflicto de ruteo).
+Tiempos base, 200 invariantes por corrida. Ver informe, seccion 8.2.
+
+aleatoria corrida 1: 22.05 s  tarjeta=77 alto_riesgo=46 transferencia=77
+aleatoria corrida 2: 22.08 s  tarjeta=77 alto_riesgo=47 transferencia=76
+aleatoria corrida 3: 20.95 s  tarjeta=89 alto_riesgo=22 transferencia=89
+priorizada corrida 1: 22.14 s  tarjeta=76 alto_riesgo=48 transferencia=76
+priorizada corrida 2: 21.21 s  tarjeta=86 alto_riesgo=28 transferencia=86
+priorizada corrida 3: 22.07 s  tarjeta=76 alto_riesgo=47 transferencia=77
