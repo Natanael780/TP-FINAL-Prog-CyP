@@ -28,6 +28,7 @@ import registro.AnalizadorInvariantes;
 import registro.Log;
 
 /**
+ * bobo el que lo lee
  * Arma y ejecuta una corrida completa: red, política, monitor, hilos, corte en 200
  * invariantes, finalización sin hilos vivos, verificación con regex y archivos de log.
  */
